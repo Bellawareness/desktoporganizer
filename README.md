@@ -13,7 +13,7 @@ A comprehensive web-based desktop organizer application that helps you track var
 
 ## Live Demo
 
-Visit the live application: [Learn Thyself Desktop Organizer](https://[your-username].github.io/[repo-name]/)
+Visit the live application: [Learn Thyself Desktop Organizer](https://bellawareness.github.io/desktoporganizer/)
 
 ## Technologies Used
 
