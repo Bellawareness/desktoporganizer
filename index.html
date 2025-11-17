@@ -1,190 +1,177 @@
-<!doctype html><!doctype html>
 
-<html lang="en" translate="no"><html lang="en" translate="no">
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="google" content="notranslate"/>
+  <title>Learn Thyself - Desktop Organizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    ...existing code...
+  </style>
+</head>
+<body>
+  ...existing code...
+  <!-- Place Firebase and app JS at the end of body -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-<head><head>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBq1YcSUoqG0tZyxlZ1L9xp3Z3iYGQ1vi0",
+      authDomain: "learn-thyself.firebaseapp.com",
+      databaseURL: "https://learn-thyself-default-rtdb.firebaseio.com",
+      projectId: "learn-thyself",
+      storageBucket: "learn-thyself.firebasestorage.app",
+      messagingSenderId: "311948279325",
+      appId: "1:311948279325:web:4dc56654bf4ef8bd9f10f4"
+    };
 
-<meta charset="utf-8"/><meta charset="utf-8"/>
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
 
-<meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+    // Make Firebase available globally
+    window.firebaseApp = app;
+    window.firebaseAuth = auth;
+    window.firebaseDatabase = database;
+    window.firebaseRef = ref;
+    window.firebaseSet = set;
+    window.firebaseGet = get;
+    window.firebaseOnValue = onValue;
+    window.firebaseSignIn = signInWithEmailAndPassword;
+    window.firebaseSignUp = createUserWithEmailAndPassword;
+    window.firebaseSignOut = signOut;
 
-<meta name="google" content="notranslate"/><meta name="google" content="notranslate"/>
+    // Wait for auth to be ready
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('✓ Connected to Firebase with user:', user.uid);
+        console.log('User email:', user.email || 'Anonymous');
+        window.firebaseUserId = user.uid;
 
-<title>Learn Thyself - Desktop Organizer</title><title>Learn Thyself - Desktop Organizer</title>
+        // If user is anonymous (old session), sign them out to show login
+        if (!user.email) {
+          console.log('⚠️ Anonymous user detected - signing out to show login');
+          window.firebaseSignOut(auth);
+          return;
+        }
 
-<script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.tailwindcss.com"></script>
+        // Check if this account has cloud data or needs migration
+        checkAndMigrateData(user);
 
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+        // Hide login modal, show app
+        const loginModal = document.getElementById('loginModal');
+        const appContent = document.getElementById('appContent');
+        if (loginModal) loginModal.style.display = 'none';
+        if (appContent) appContent.style.display = 'block';
 
-</head><!-- Firebase SDKs -->
-
-<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white"><script type="module">
-
-<div class="container mx-auto px-4 py-8">  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-
-<h1 class="text-4xl font-bold text-center mb-8" style="font-family: 'Pacifico', cursive;">  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-
-Learn Thyself - Desktop Organizer  import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
-</h1>  
-
-<div class="text-center">  // Firebase configuration
-
-<p class="text-xl mb-4">Your comprehensive life tracking application</p>  const firebaseConfig = {
-
-<p class="text-lg">Loading...</p>    apiKey: "AIzaSyBq1YcSUoqG0tZyxlZ1L9xp3Z3iYGQ1vi0",
-
-</div>    authDomain: "learn-thyself.firebaseapp.com",
-
-</div>    databaseURL: "https://learn-thyself-default-rtdb.firebaseio.com",
-
-</body>    projectId: "learn-thyself",
-
-</html>    storageBucket: "learn-thyself.firebasestorage.app",
-    messagingSenderId: "311948279325",
-    appId: "1:311948279325:web:4dc56654bf4ef8bd9f10f4"
-  };
-  
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const database = getDatabase(app);
-  
-  // Make Firebase available globally
-  window.firebaseApp = app;
-  window.firebaseAuth = auth;
-  window.firebaseDatabase = database;
-  window.firebaseRef = ref;
-  window.firebaseSet = set;
-  window.firebaseGet = get;
-  window.firebaseOnValue = onValue;
-  window.firebaseSignIn = signInWithEmailAndPassword;
-  window.firebaseSignUp = createUserWithEmailAndPassword;
-  window.firebaseSignOut = signOut;
-  
-  // Wait for auth to be ready
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log('✓ Connected to Firebase with user:', user.uid);
-      console.log('User email:', user.email || 'Anonymous');
-      window.firebaseUserId = user.uid;
-      
-      // If user is anonymous (old session), sign them out to show login
-      if (!user.email) {
-        console.log('⚠️ Anonymous user detected - signing out to show login');
-        window.firebaseSignOut(auth);
-        return;
+        // Show user email
+        const userEmail = document.getElementById('userEmail');
+        if (userEmail && user.email) {
+          userEmail.textContent = user.email;
+        }
+      } else {
+        // Not logged in - show login modal
+        console.log('👤 No user logged in - showing login screen');
+        const loginModal = document.getElementById('loginModal');
+        const appContent = document.getElementById('appContent');
+        if (loginModal) loginModal.style.display = 'flex';
+        if (appContent) appContent.style.display = 'none';
       }
-      
-      // Check if this account has cloud data or needs migration
-      checkAndMigrateData(user);
-      
-      // Hide login modal, show app
-      const loginModal = document.getElementById('loginModal');
-      const appContent = document.getElementById('appContent');
-      if (loginModal) loginModal.style.display = 'none';
-      if (appContent) appContent.style.display = 'block';
-      
-      // Show user email
-      const userEmail = document.getElementById('userEmail');
-      if (userEmail && user.email) {
-        userEmail.textContent = user.email;
-      }
-    } else {
-      // Not logged in - show login modal
-      console.log('👤 No user logged in - showing login screen');
-      const loginModal = document.getElementById('loginModal');
-      const appContent = document.getElementById('appContent');
-      if (loginModal) loginModal.style.display = 'flex';
-      if (appContent) appContent.style.display = 'none';
-    }
-  });
-  
-  // Check if account needs data migration
-  async function checkAndMigrateData(user) {
-    if (!window.firebaseDatabase) return;
-    
-    // Check if cloud has any data
-    const userRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}`);
-    const snapshot = await window.firebaseGet(userRef);
-    
-    // Check if localStorage has any data
-    const hasLocalData = ['dailyMoodEnergy', 'activities', 'dailyRatings', 'dailySpending', 'daysCried', 'itemsLost']
-      .some(key => localStorage.getItem(key) && localStorage.getItem(key) !== '[]' && localStorage.getItem(key) !== '{}');
-    
-    if (!snapshot.exists() && hasLocalData) {
-      // New account with existing local data - offer migration
-      const migrate = confirm(
-        '📤 Upload Existing Data?\n\n' +
-        'You have existing habit data on this device.\n\n' +
-        'Would you like to upload it to your new account?\n\n' +
-        '✅ YES - Upload all your data to the cloud\n' +
-        '❌ NO - Start fresh (local data stays on this device only)'
-      );
-      
-      if (migrate) {
-        console.log('🔄 Migrating local data to cloud...');
-        let migrated = 0;
-        
+    });
+
+    // Check if account needs data migration
+    async function checkAndMigrateData(user) {
+      if (!window.firebaseDatabase) return;
+
+      // Check if cloud has any data
+      const userRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}`);
+      const snapshot = await window.firebaseGet(userRef);
+
+      // Check if localStorage has any data
+      const hasLocalData = ['dailyMoodEnergy', 'activities', 'dailyRatings', 'dailySpending', 'daysCried', 'itemsLost']
+        .some(key => localStorage.getItem(key) && localStorage.getItem(key) !== '[]' && localStorage.getItem(key) !== '{}');
+
+      if (!snapshot.exists() && hasLocalData) {
+        // New account with existing local data - offer migration
+        const migrate = confirm(
+          '📤 Upload Existing Data?\n\n' +
+          'You have existing habit data on this device.\n\n' +
+          'Would you like to upload it to your new account?\n\n' +
+          '✅ YES - Upload all your data to the cloud\n' +
+          '❌ NO - Start fresh (local data stays on this device only)'
+        );
+
+        if (migrate) {
+          console.log('🔄 Migrating local data to cloud...');
+          let migrated = 0;
+
+          const STORAGE_KEYS = [
+            'dailyMoodEnergy', 'activities', 'dailyRatings', 'activityCompletions',
+            'dailyTodo', 'getItDone', 'dailySpending', 'daysCried', 'itemsLost',
+            'waterIntake', 'timeTracked', 'photos', 'selectedTheme'
+          ];
+
+          for (const key of STORAGE_KEYS) {
+            const value = localStorage.getItem(key);
+            if (value) {
+              try {
+                const data = JSON.parse(value);
+                const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
+                await window.firebaseSet(dataRef, data);
+                migrated++;
+                console.log(`✓ Migrated ${key}`);
+              } catch(e) {
+                const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
+                await window.firebaseSet(dataRef, value);
+                migrated++;
+                console.log(`✓ Migrated ${key}`);
+              }
+            }
+          }
+
+          console.log(`✅ Migration complete! Uploaded ${migrated} items`);
+          alert(`✅ Success!\n\nUploaded ${migrated} items to your account.\n\nYour data is now synced across all devices!`);
+        } else {
+          console.log('⏭️ User chose not to migrate data');
+        }
+      } else if (snapshot.exists() && !hasLocalData) {
+        // Account has cloud data, but device is empty - download it
+        console.log('⬇️ Downloading data from cloud...');
+
         const STORAGE_KEYS = [
           'dailyMoodEnergy', 'activities', 'dailyRatings', 'activityCompletions',
           'dailyTodo', 'getItDone', 'dailySpending', 'daysCried', 'itemsLost',
           'waterIntake', 'timeTracked', 'photos', 'selectedTheme'
         ];
-        
+
+        let downloaded = 0;
         for (const key of STORAGE_KEYS) {
-          const value = localStorage.getItem(key);
-          if (value) {
-            try {
-              const data = JSON.parse(value);
-              const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
-              await window.firebaseSet(dataRef, data);
-              migrated++;
-              console.log(`✓ Migrated ${key}`);
-            } catch(e) {
-              const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
-              await window.firebaseSet(dataRef, value);
-              migrated++;
-              console.log(`✓ Migrated ${key}`);
-            }
+          const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
+          const keySnapshot = await window.firebaseGet(dataRef);
+          if (keySnapshot.exists()) {
+            const data = keySnapshot.val();
+            localStorage.setItem(key, typeof data === 'string' ? data : JSON.stringify(data));
+            downloaded++;
           }
         }
-        
-        console.log(`✅ Migration complete! Uploaded ${migrated} items`);
-        alert(`✅ Success!\n\nUploaded ${migrated} items to your account.\n\nYour data is now synced across all devices!`);
-      } else {
-        console.log('⏭️ User chose not to migrate data');
+
+        console.log(`✅ Downloaded ${downloaded} items from cloud`);
+        setTimeout(() => {
+          alert(`✅ Welcome back!\n\nDownloaded ${downloaded} items from your account.\n\nPage will now refresh to show your data.`);
+          location.reload();
+        }, 500);
       }
-    } else if (snapshot.exists() && !hasLocalData) {
-      // Account has cloud data, but device is empty - download it
-      console.log('⬇️ Downloading data from cloud...');
-      
-      const STORAGE_KEYS = [
-        'dailyMoodEnergy', 'activities', 'dailyRatings', 'activityCompletions',
-        'dailyTodo', 'getItDone', 'dailySpending', 'daysCried', 'itemsLost',
-        'waterIntake', 'timeTracked', 'photos', 'selectedTheme'
-      ];
-      
-      let downloaded = 0;
-      for (const key of STORAGE_KEYS) {
-        const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
-        const keySnapshot = await window.firebaseGet(dataRef);
-        if (keySnapshot.exists()) {
-          const data = keySnapshot.val();
-          localStorage.setItem(key, typeof data === 'string' ? data : JSON.stringify(data));
-          downloaded++;
-        }
-      }
-      
-      console.log(`✅ Downloaded ${downloaded} items from cloud`);
-      setTimeout(() => {
-        alert(`✅ Welcome back!\n\nDownloaded ${downloaded} items from your account.\n\nPage will now refresh to show your data.`);
-        location.reload();
-      }, 500);
     }
-  }
-</script>
-</script>
+  </script>
+</body>
+</html>
 <style>
 :root{
 --pastel-pink:#ffd6e7;
