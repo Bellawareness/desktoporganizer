@@ -15,56 +15,6 @@
 <body>
   ...existing code...
   <!-- Place Firebase and app JS at the end of body -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
-    // Firebase configuration
-    const firebaseConfig = {
-  apiKey: "AIzaSyBIFBXiJD3hYGRebYidXL5eJmaNytsICGE",
-      authDomain: "learn-thyself.firebaseapp.com",
-      databaseURL: "https://learn-thyself-default-rtdb.firebaseio.com",
-      projectId: "learn-thyself",
-      storageBucket: "learn-thyself.firebasestorage.app",
-      messagingSenderId: "311948279325",
-      appId: "1:311948279325:web:4dc56654bf4ef8bd9f10f4"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-
-    // Make Firebase available globally
-    window.firebaseApp = app;
-    window.firebaseAuth = auth;
-    window.firebaseDatabase = database;
-    window.firebaseRef = ref;
-    window.firebaseSet = set;
-    window.firebaseGet = get;
-    window.firebaseOnValue = onValue;
-    window.firebaseSignIn = signInWithEmailAndPassword;
-    window.firebaseSignUp = createUserWithEmailAndPassword;
-    window.firebaseSignOut = signOut;
-
-    // Wait for auth to be ready
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log('✓ Connected to Firebase with user:', user.uid);
-        console.log('User email:', user.email || 'Anonymous');
-        window.firebaseUserId = user.uid;
-
-        // If user is anonymous (old session), sign them out to show login
-        if (!user.email) {
-          console.log('⚠️ Anonymous user detected - signing out to show login');
-          window.firebaseSignOut(auth);
-          return;
-        }
-
-        // Check if this account has cloud data or needs migration
-        checkAndMigrateData(user);
-
         // Hide login modal, show app
         const loginModal = document.getElementById('loginModal');
         const appContent = document.getElementById('appContent');
