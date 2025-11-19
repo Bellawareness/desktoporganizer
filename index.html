@@ -9,116 +9,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
-    ...existing code...
+    
   </style>
 </head>
 <body>
-  ...existing code...
-  <!-- Place Firebase and app JS at the end of body -->
-        // Hide login modal, show app
-        const loginModal = document.getElementById('loginModal');
-        const appContent = document.getElementById('appContent');
-        if (loginModal) loginModal.style.display = 'none';
-        if (appContent) appContent.style.display = 'block';
-
-        // Show user email
-        const userEmail = document.getElementById('userEmail');
-        if (userEmail && user.email) {
-          userEmail.textContent = user.email;
-        }
-      } else {
-        // Not logged in - show login modal
-        console.log('👤 No user logged in - showing login screen');
-        const loginModal = document.getElementById('loginModal');
-        const appContent = document.getElementById('appContent');
-        if (loginModal) loginModal.style.display = 'flex';
-        if (appContent) appContent.style.display = 'none';
-      }
-    });
-
-    // Check if account needs data migration
-    async function checkAndMigrateData(user) {
-      if (!window.firebaseDatabase) return;
-
-      // Check if cloud has any data
-      const userRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}`);
-      const snapshot = await window.firebaseGet(userRef);
-
-      // Check if localStorage has any data
-      const hasLocalData = ['dailyMoodEnergy', 'activities', 'dailyRatings', 'dailySpending', 'daysCried', 'itemsLost']
-        .some(key => localStorage.getItem(key) && localStorage.getItem(key) !== '[]' && localStorage.getItem(key) !== '{}');
-
-      if (!snapshot.exists() && hasLocalData) {
-        // New account with existing local data - offer migration
-        const migrate = confirm(
-          '📤 Upload Existing Data?\n\n' +
-          'You have existing habit data on this device.\n\n' +
-          'Would you like to upload it to your new account?\n\n' +
-          '✅ YES - Upload all your data to the cloud\n' +
-          '❌ NO - Start fresh (local data stays on this device only)'
-        );
-
-        if (migrate) {
-          console.log('🔄 Migrating local data to cloud...');
-          let migrated = 0;
-
-          const STORAGE_KEYS = [
-            'dailyMoodEnergy', 'activities', 'dailyRatings', 'activityCompletions',
-            'dailyTodo', 'getItDone', 'dailySpending', 'daysCried', 'itemsLost',
-            'waterIntake', 'timeTracked', 'photos', 'selectedTheme'
-          ];
-
-          for (const key of STORAGE_KEYS) {
-            const value = localStorage.getItem(key);
-            if (value) {
-              try {
-                const data = JSON.parse(value);
-                const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
-                await window.firebaseSet(dataRef, data);
-                migrated++;
-                console.log(`✓ Migrated ${key}`);
-              } catch(e) {
-                const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
-                await window.firebaseSet(dataRef, value);
-                migrated++;
-                console.log(`✓ Migrated ${key}`);
-              }
-            }
-          }
-
-          console.log(`✅ Migration complete! Uploaded ${migrated} items`);
-          alert(`✅ Success!\n\nUploaded ${migrated} items to your account.\n\nYour data is now synced across all devices!`);
-        } else {
-          console.log('⏭️ User chose not to migrate data');
-        }
-      } else if (snapshot.exists() && !hasLocalData) {
-        // Account has cloud data, but device is empty - download it
-        console.log('⬇️ Downloading data from cloud...');
-
-        const STORAGE_KEYS = [
-          'dailyMoodEnergy', 'activities', 'dailyRatings', 'activityCompletions',
-          'dailyTodo', 'getItDone', 'dailySpending', 'daysCried', 'itemsLost',
-          'waterIntake', 'timeTracked', 'photos', 'selectedTheme'
-        ];
-
-        let downloaded = 0;
-        for (const key of STORAGE_KEYS) {
-          const dataRef = window.firebaseRef(window.firebaseDatabase, `users/${user.uid}/${key}`);
-          const keySnapshot = await window.firebaseGet(dataRef);
-          if (keySnapshot.exists()) {
-            const data = keySnapshot.val();
-            localStorage.setItem(key, typeof data === 'string' ? data : JSON.stringify(data));
-            downloaded++;
-          }
-        }
-
-        console.log(`✅ Downloaded ${downloaded} items from cloud`);
-        setTimeout(() => {
-          alert(`✅ Welcome back!\n\nDownloaded ${downloaded} items from your account.\n\nPage will now refresh to show your data.`);
-          location.reload();
-        }, 500);
-      }
-    }
+  
   </script>
 </body>
 </html>
@@ -135,107 +30,7 @@
 --card-bg:rgba(255,255,255,0.95);
 --text-primary:#374151;
 --text-secondary:#6b7280;
---border-color:rgba(255,154,162,0.2);
---accent-1:#ec4899;
---accent-2:#8b5cf6;
---accent-3:#0ea5e9;
-}
-/* Ocean Theme */
-body.theme-ocean{
---bg-gradient-start:#e0f2fe;
---bg-gradient-end:#bae6fd;
---card-bg:rgba(255,255,255,0.92);
---pastel-pink:#67e8f9;
---pastel-blue:#0ea5e9;
---pastel-lavender:#38bdf8;
---pastel-mint:#22d3ee;
---pastel-peach:#06b6d4;
---pastel-yellow:#0891b2;
---accent-1:#0ea5e9;
---accent-2:#0284c7;
---accent-3:#06b6d4;
---text-primary:#0c4a6e;
---text-secondary:#075985;
-}
-body.theme-ocean .card-title{color:#0369a1 !important;}
-body.theme-ocean .activity-item{background:#bae6fd !important;border:2px solid #0ea5e9;}
-body.theme-ocean .activity-item:nth-child(2n){background:#a5f3fc !important;border-color:#06b6d4;}
-body.theme-ocean .activity-item:nth-child(3n){background:#7dd3fc !important;border-color:#0284c7;}
-body.theme-ocean .rating-row{background:#cffafe;border:2px solid #22d3ee;}
-body.theme-ocean .mood-btn{background:#bae6fd;border:2px solid #0ea5e9;color:#0c4a6e;}
-body.theme-ocean .mood-btn.selected{background:#0ea5e9;color:white;}
-body.theme-ocean .progress-fill{background:linear-gradient(90deg,#06b6d4,#0ea5e9);}
-body.theme-ocean input[type="range"]{background:linear-gradient(90deg,#67e8f9,#22d3ee);}
-body.theme-ocean input[type="range"]::-webkit-slider-thumb{background:#0ea5e9;}
-body.theme-ocean input[type="range"]::-moz-range-thumb{background:#0ea5e9;}
-/* Forest Theme */
-body.theme-forest{
---bg-gradient-start:#ecfdf5;
---bg-gradient-end:#d1fae5;
---card-bg:rgba(255,255,255,0.92);
---pastel-pink:#86efac;
---pastel-blue:#6ee7b7;
---pastel-lavender:#34d399;
---pastel-mint:#10b981;
---pastel-peach:#059669;
---pastel-yellow:#047857;
---accent-1:#10b981;
---accent-2:#059669;
---accent-3:#34d399;
---text-primary:#064e3b;
---text-secondary:#065f46;
-}
-body.theme-forest .card-title{color:#047857 !important;}
-body.theme-forest .activity-item{background:#d1fae5 !important;border:2px solid #10b981;}
-body.theme-forest .activity-item:nth-child(2n){background:#a7f3d0 !important;border-color:#34d399;}
-body.theme-forest .activity-item:nth-child(3n){background:#6ee7b7 !important;border-color:#059669;}
-body.theme-forest .rating-row{background:#d1fae5;border:2px solid #34d399;}
-body.theme-forest .mood-btn{background:#d1fae5;border:2px solid #10b981;color:#064e3b;}
-body.theme-forest .mood-btn.selected{background:#10b981;color:white;}
-body.theme-forest .progress-fill{background:linear-gradient(90deg,#059669,#10b981);}
-body.theme-forest input[type="range"]{background:linear-gradient(90deg,#6ee7b7,#34d399);}
-body.theme-forest input[type="range"]::-webkit-slider-thumb{background:#10b981;}
-body.theme-forest input[type="range"]::-moz-range-thumb{background:#10b981;}
-/* Sunset Theme */
-body.theme-sunset{
---bg-gradient-start:#fef3c7;
---bg-gradient-end:#fed7aa;
---card-bg:rgba(255,255,255,0.92);
---pastel-pink:#fca5a5;
---pastel-blue:#fb923c;
---pastel-lavender:#f97316;
---pastel-mint:#fbbf24;
---pastel-peach:#f59e0b;
---pastel-yellow:#eab308;
---accent-1:#f97316;
---accent-2:#ea580c;
---accent-3:#fb923c;
---text-primary:#78350f;
---text-secondary:#92400e;
-}
-body.theme-sunset .card-title{color:#c2410c !important;}
-body.theme-sunset .activity-item{background:#fed7aa !important;border:2px solid #fb923c;}
-body.theme-sunset .activity-item:nth-child(2n){background:#fde68a !important;border-color:#fbbf24;}
-body.theme-sunset .activity-item:nth-child(3n){background:#fef3c7 !important;border-color:#f59e0b;}
-body.theme-sunset .rating-row{background:#fef3c7;border:2px solid #fbbf24;}
-body.theme-sunset .mood-btn{background:#fed7aa;border:2px solid #fb923c;color:#78350f;}
-body.theme-sunset .mood-btn.selected{background:#f97316;color:white;}
-body.theme-sunset .progress-fill{background:linear-gradient(90deg,#f59e0b,#fb923c);}
-body.theme-sunset input[type="range"]{background:linear-gradient(90deg,#fca5a5,#fb923c);}
-body.theme-sunset input[type="range"]::-webkit-slider-thumb{background:#f97316;}
-body.theme-sunset input[type="range"]::-moz-range-thumb{background:#f97316;}
-body.dark-mode{
---pastel-pink:#c084a1;
---pastel-blue:#6b9bc3;
---pastel-lavender:#a78bfa;
---pastel-mint:#6ee7b7;
---pastel-peach:#fbbf24;
---pastel-yellow:#fcd34d;
---bg-gradient-start:#0f0a1a;
---bg-gradient-end:#1a1f2e;
---card-bg:rgba(45,40,60,0.95);
---text-primary:#f9fafb;
---text-secondary:#e5e7eb;
+  
 --border-color:rgba(167,139,250,0.4);
 }
 body.dark-mode .card-title{color:#fde047 !important;}
@@ -421,58 +216,7 @@ transform:translateY(0);
 </style>
 </head>
 <body>
-<!-- Login Modal -->
-<div id="loginModal" style="display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
-<div style="background:white;padding:32px 24px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:460px;width:100%;margin:auto;">
-<h1 style="font-family:'Pacifico',cursive;font-size:clamp(1.75rem, 5vw, 2.5rem);text-align:center;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;line-height:1.2;">Learn Thyself</h1>
-<p style="text-align:center;color:#6b7280;margin-bottom:20px;font-size:clamp(0.875rem, 2.5vw, 0.95rem);font-weight:500;">Your personal habit & wellness tracker</p>
 
-<!-- Feature List -->
-<div style="background:linear-gradient(135deg,#f0f4ff,#faf5ff);border-radius:12px;padding:16px;margin-bottom:20px;">
-<div style="display:grid;gap:10px;">
-<div style="display:flex;align-items:center;gap:10px;">
-<span style="font-size:1.25rem;">📊</span>
-<span style="font-size:clamp(0.8rem, 2vw, 0.875rem);color:#4b5563;">Track mood, energy, habits & activities</span>
-</div>
-<div style="display:flex;align-items:center;gap:10px;">
-<span style="font-size:1.25rem;">☁️</span>
-<span style="font-size:clamp(0.8rem, 2vw, 0.875rem);color:#4b5563;">Sync across all your devices</span>
-</div>
-<div style="display:flex;align-items:center;gap:10px;">
-<span style="font-size:1.25rem;">🔒</span>
-<span style="font-size:clamp(0.8rem, 2vw, 0.875rem);color:#4b5563;">Private & secure - only you see your data</span>
-</div>
-<div style="display:flex;align-items:center;gap:10px;">
-<span style="font-size:1.25rem;">📈</span>
-<span style="font-size:clamp(0.8rem, 2vw, 0.875rem);color:#4b5563;">View insights & patterns over time</span>
-</div>
-</div>
-</div>
-
-<!-- Login/Signup Tabs -->
-<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid #e5e7eb;">
-<button id="loginTab" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border:none;background:none;font-weight:600;font-size:clamp(0.875rem, 2.5vw, 1rem);color:#667eea;border-bottom:3px solid #667eea;cursor:pointer;transition:all 0.2s;">Login</button>
-<button id="signupTab" onclick="switchAuthTab('signup')" style="flex:1;padding:10px;border:none;background:none;font-weight:600;font-size:clamp(0.875rem, 2.5vw, 1rem);color:#9ca3af;border-bottom:3px solid transparent;cursor:pointer;transition:all 0.2s;">Sign Up</button>
-</div>
-
-<!-- Login Form -->
-<div id="loginForm">
-<input type="email" id="loginEmail" placeholder="Email" autocomplete="email" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:12px;font-size:clamp(0.875rem, 2.5vw, 1rem);margin-bottom:14px;box-sizing:border-box;transition:border 0.2s;"/>
-<input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:12px;font-size:clamp(0.875rem, 2.5vw, 1rem);margin-bottom:14px;box-sizing:border-box;transition:border 0.2s;"/>
-<button onclick="handleLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;font-size:clamp(0.95rem, 2.5vw, 1.1rem);font-weight:600;cursor:pointer;transition:transform 0.2s,opacity 0.2s;touch-action:manipulation;">Login</button>
-</div>
-
-<!-- Signup Form -->
-<div id="signupForm" style="display:none;">
-<input type="email" id="signupEmail" placeholder="Email" autocomplete="email" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:12px;font-size:clamp(0.875rem, 2.5vw, 1rem);margin-bottom:14px;box-sizing:border-box;transition:border 0.2s;"/>
-<input type="password" id="signupPassword" placeholder="Password (min 6 characters)" autocomplete="new-password" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:12px;font-size:clamp(0.875rem, 2.5vw, 1rem);margin-bottom:14px;box-sizing:border-box;transition:border 0.2s;"/>
-<input type="password" id="signupPasswordConfirm" placeholder="Confirm Password" autocomplete="new-password" style="width:100%;padding:14px;border:2px solid #e5e7eb;border-radius:12px;font-size:clamp(0.875rem, 2.5vw, 1rem);margin-bottom:14px;box-sizing:border-box;transition:border 0.2s;"/>
-<button onclick="handleSignup()" style="width:100%;padding:14px;background:linear-gradient(135deg,#10b981,#34d399);color:white;border:none;border-radius:12px;font-size:clamp(0.95rem, 2.5vw, 1.1rem);font-weight:600;cursor:pointer;transition:transform 0.2s,opacity 0.2s;touch-action:manipulation;">Create Account</button>
-</div>
-
-<div id="authError" style="margin-top:14px;padding:12px;background:#fee2e2;border-radius:8px;color:#dc2626;font-size:clamp(0.8rem, 2vw, 0.875rem);display:none;word-break:break-word;"></div>
-</div>
-</div>
 
 <!-- Settings Modal -->
 <div id="settingsModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:16px;" onclick="closeSettingsIfClickOutside(event)">
@@ -510,7 +254,7 @@ transform:translateY(0);
 </div>
 </div>
 
-<div id="appContent" style="display:none;">
+<div id="appContent" style="display:block;">
 <div class="container">
 <div class="header-hero">
 <div class="header-overlay"></div>
